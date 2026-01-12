@@ -5,26 +5,55 @@
 <title>Publicidad</title>
 
 <style>
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  background: black;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
 }
 
-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* cambia a cover si quieres llenar la TV */
-  opacity: 0;
-  transition: opacity 1s ease-in-out;
+body{
+  background:#000;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+  cursor:none;
+}
+
+.slideshow-container{
+  position:relative;
+  width:100%;
+  height:100%;
+}
+
+.slide{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transition:opacity 1s ease-in-out;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.slide.active{
+  opacity:1;
+}
+
+.slide img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain; /* usa cover si quieres llenar pantalla */
 }
 </style>
 </head>
 
 <body>
 
-<img id="img">
+<div class="slideshow-container">
+  <div class="slide active">
+    <img id="img">
+  </div>
+</div>
 
 <script>
 // 👇 EDITA SOLO ESTA LISTA
@@ -35,6 +64,28 @@ const imagenes = [
 ];
 
 // tiempo por imagen (ms)
+const tiempo = 9000;
+
+let i = 0;
+const slide = document.querySelector(".slide");
+const img = document.getElementById("img");
+
+function mostrar() {
+  slide.classList.remove("active");
+
+  setTimeout(() => {
+    img.src = imagenes[i] + "?t=" + Date.now();
+    slide.classList.add("active");
+    i = (i + 1) % imagenes.length;
+  }, 500);
+}
+
+mostrar();
+setInterval(mostrar, tiempo);
+</script>
+
+</body>
+</html>// tiempo por imagen (ms)
 const tiempo = 10000;
 
 let i = 0;
