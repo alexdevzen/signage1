@@ -2,14 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Publicidad</title>
 <style>
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -18,11 +17,10 @@ body {
   height: 100vh;
   overflow: hidden;
   cursor: none;
-  font-family: system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-.container {
+.slideshow-container {
   position: relative;
   width: 100%;
   height: 100%;
@@ -31,91 +29,63 @@ body {
 
 .slide {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   opacity: 0;
-  transition: opacity 1.2s ease-in-out;
+  transition: opacity 1s ease-in-out;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2.5vh;
 }
 
-.slide.show {
+.slide.active {
   opacity: 1;
-  z-index: 2;
 }
 
 .slide img {
   max-width: 100%;
   max-height: 100%;
-  width: auto;
-  height: auto;
   object-fit: contain;
-  border-radius: 6px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-  display: block;
+  border-radius: 8px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
-@media (min-width: 1024px) {
-  .slide {
-    padding: 3vh;
-  }
+@media (min-width: 1280px) {
   .slide img {
-    border-radius: 10px;
+    border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
   }
 }
 </style>
 </head>
 <body>
-
-<div class="container">
-  <div class="slide show"><img alt=""></div>
-  <div class="slide"><img alt=""></div>
+<div class="slideshow-container">
+  <div class="slide active">
+    <img id="img" alt="">
+  </div>
 </div>
-
 <script>
 // 👇 EDITA SOLO ESTA LISTA
 const imagenes = [
   "images/imagen1.jpg",
-  "images/imagen2.jpg",
-  "images/imagen3.jpg"
+  "images/imagen2.jpg"
 ];
-
-// Tiempo por imagen en milisegundos
-const tiempo = 5000;
-
-// ====== NO EDITAR ABAJO ======
-let indice = 0;
-let slideActual = 0;
-const slides = document.querySelectorAll('.slide');
-const imgs = document.querySelectorAll('.slide img');
-
-function cambiar() {
-  const siguienteSlide = slideActual === 0 ? 1 : 0;
-  const siguienteIndice = (indice + 1) % imagenes.length;
-  
-  // Cargar siguiente imagen
-  imgs[siguienteSlide].src = imagenes[siguienteIndice] + '?t=' + Date.now();
-  
-  // Esperar a que cargue
-  imgs[siguienteSlide].onload = () => {
-    slides[slideActual].classList.remove('show');
-    slides[siguienteSlide].classList.add('show');
-    slideActual = siguienteSlide;
-    indice = siguienteIndice;
-  };
+// tiempo por imagen (ms)
+const tiempo = 10000;
+let i = 0;
+const slide = document.querySelector(".slide");
+const img = document.getElementById("img");
+function mostrar() {
+  slide.classList.remove("active");
+  setTimeout(() => {
+    img.src = imagenes[i] + "?t=" + Date.now();
+    slide.classList.add("active");
+    i = (i + 1) % imagenes.length;
+  }, 500);
 }
-
-// Mostrar primera imagen
-imgs[0].src = imagenes[0];
-
-// Cambiar según tiempo programado
-setInterval(cambiar, tiempo);
+mostrar();
+setInterval(mostrar, tiempo);
 </script>
-
 </body>
 </html>
