@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -87,7 +86,7 @@ const imagenes = [
 ];
 
 // Tiempo por imagen en milisegundos
-const tiempo = 9000;
+const tiempo = 5000;
 
 // ====== NO EDITAR ABAJO ======
 let indice = 0;
@@ -95,32 +94,29 @@ let slideActual = 0;
 const slides = document.querySelectorAll('.slide');
 const imgs = document.querySelectorAll('.slide img');
 
-function cargarImagen(imgElement, src) {
-  return new Promise((resolve) => {
-    imgElement.onload = resolve;
-    imgElement.onerror = resolve;
-    imgElement.src = src + '?t=' + Date.now();
-  });
-}
-
-async function cambiar() {
+function cambiar() {
   const siguienteSlide = slideActual === 0 ? 1 : 0;
-  const siguienteIndice = (indice + 1) % imagenes.length;
   
-  await cargarImagen(imgs[siguienteSlide], imagenes[siguienteIndice]);
+  // Cargar siguiente imagen
+  imgs[siguienteSlide].src = imagenes[indice] + '?t=' + Date.now();
   
-  slides[slideActual].classList.remove('show');
-  slides[siguienteSlide].classList.add('show');
+  // Esperar a que cargue
+  imgs[siguienteSlide].onload = () => {
+    slides[slideActual].classList.remove('show');
+    slides[siguienteSlide].classList.add('show');
+    slideActual = siguienteSlide;
+  };
   
-  slideActual = siguienteSlide;
-  indice = siguienteIndice;
+  // Avanzar índice
+  indice = (indice + 1) % imagenes.length;
 }
 
-// Inicializar
-cargarImagen(imgs[0], imagenes[0]).then(() => {
-  indice = 0;
-  setInterval(cambiar, tiempo);
-});
+// Mostrar primera imagen
+imgs[0].src = imagenes[0];
+indice = 1;
+
+// Cambiar según tiempo programado
+setInterval(cambiar, tiempo);
 </script>
 
 </body>
