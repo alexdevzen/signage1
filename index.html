@@ -1,85 +1,83 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Publicidad</title>
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
-body{
-  background:#000;
-  width:100vw;
-  height:100vh;
-  overflow:hidden;
-  cursor:none;
-  font-family: system-ui, -apple-system, sans-serif;
+
+body {
+  background: #000;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  cursor: none;
+  font-family: system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
-.slideshow-container{
-  position:relative;
-  width:100%;
-  height:100%;
-  background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, #0f0f0f 0%, #000 70%);
 }
-.slide{
-  position:absolute;
-  inset:0;
-  opacity:0;
-  transition:opacity 1s ease-in-out;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: 20px;
+
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5vh;
 }
-.slide.active{
-  opacity:1;
+
+.slide.show {
+  opacity: 1;
+  z-index: 2;
 }
-.slide img{
+
+.slide img {
   max-width: 100%;
   max-height: 100%;
   width: auto;
   height: auto;
   object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    0 0 80px rgba(255, 255, 255, 0.03);
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  border-radius: 6px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  display: block;
 }
 
-/* Optimización para TVs y pantallas grandes */
-@media (min-width: 1280px) {
+@media (min-width: 1024px) {
   .slide {
-    padding: 40px;
+    padding: 3vh;
   }
   .slide img {
-    border-radius: 12px;
+    border-radius: 10px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
   }
-}
-
-/* Previene parpadeo en transiciones */
-.slide img {
-  will-change: opacity;
 }
 </style>
 </head>
 <body>
-<div class="slideshow-container">
-  <div class="slide active">
-    <img alt="Publicidad">
-  </div>
-  <div class="slide">
-    <img alt="Publicidad">
-  </div>
+
+<div class="container">
+  <div class="slide show"><img alt=""></div>
+  <div class="slide"><img alt=""></div>
 </div>
+
 <script>
 // 👇 EDITA SOLO ESTA LISTA
 const imagenes = [
@@ -87,33 +85,43 @@ const imagenes = [
   "images/imagen2.jpg",
   "images/imagen3.jpg"
 ];
-// tiempo por imagen (ms)
-const tiempo = 5000;
-let i = 0;
-const slides = document.querySelectorAll(".slide");
-let actual = 0;
 
-function mostrar() {
-  const siguiente = (actual + 1) % 2;
-  
-  // Precargar siguiente imagen
-  slides[siguiente].querySelector("img").src = imagenes[i] + "?t=" + Date.now();
-  
-  // Esperar a que cargue y hacer transición
-  slides[siguiente].querySelector("img").onload = () => {
-    slides[actual].classList.remove("active");
-    slides[siguiente].classList.add("active");
-    actual = siguiente;
-  };
-  
-  i = (i + 1) % imagenes.length;
+// Tiempo por imagen en milisegundos
+const tiempo = 9000;
+
+// ====== NO EDITAR ABAJO ======
+let indice = 0;
+let slideActual = 0;
+const slides = document.querySelectorAll('.slide');
+const imgs = document.querySelectorAll('.slide img');
+
+function cargarImagen(imgElement, src) {
+  return new Promise((resolve) => {
+    imgElement.onload = resolve;
+    imgElement.onerror = resolve;
+    imgElement.src = src + '?t=' + Date.now();
+  });
 }
 
-// Cargar primera imagen
-slides[0].querySelector("img").src = imagenes[0];
-i = 1;
+async function cambiar() {
+  const siguienteSlide = slideActual === 0 ? 1 : 0;
+  const siguienteIndice = (indice + 1) % imagenes.length;
+  
+  await cargarImagen(imgs[siguienteSlide], imagenes[siguienteIndice]);
+  
+  slides[slideActual].classList.remove('show');
+  slides[siguienteSlide].classList.add('show');
+  
+  slideActual = siguienteSlide;
+  indice = siguienteIndice;
+}
 
-setInterval(mostrar, tiempo);
+// Inicializar
+cargarImagen(imgs[0], imagenes[0]).then(() => {
+  indice = 0;
+  setInterval(cambiar, tiempo);
+});
 </script>
+
 </body>
 </html>
