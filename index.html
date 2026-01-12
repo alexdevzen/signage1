@@ -69,34 +69,15 @@ body{
 .slide img {
   will-change: opacity;
 }
-
-/* Loader sutil mientras carga (opcional) */
-.slide::before {
-  content: '';
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.slide:not(.active)::before {
-  opacity: 1;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
 </style>
 </head>
 <body>
 <div class="slideshow-container">
   <div class="slide active">
-    <img id="img" alt="Publicidad">
+    <img alt="Publicidad">
+  </div>
+  <div class="slide">
+    <img alt="Publicidad">
   </div>
 </div>
 <script>
@@ -109,90 +90,30 @@ const imagenes = [
 // tiempo por imagen (ms)
 const tiempo = 5000;
 let i = 0;
-const slide = document.querySelector(".slide");
-const img = document.getElementById("img");
-function mostrar() {
-  slide.classList.remove("active");
-  setTimeout(() => {
-    img.src = imagenes[i] + "?t=" + Date.now();
-    slide.classList.add("active");
-    i = (i + 1) % imagenes.length;
-  }, 500);
-}
-mostrar();
-setInterval(mostrar, tiempo);
-</script>
-</body>
-</html>
-.slide.active{
-  opacity:1;
-}
-
-.slide img{
-  max-width:100%;
-  max-height:100%;
-  object-fit:contain; /* usa cover si quieres llenar pantalla */
-}
-</style>
-</head>
-
-<body>
-
-<div class="slideshow-container">
-  <div class="slide active">
-    <img id="img">
-  </div>
-</div>
-
-<script>
-// 👇 EDITA SOLO ESTA LISTA
-const imagenes = [
-  "images/imagen1.jpg",
-  "images/imagen2.jpg",
-  "images/imagen3.jpg"
-];
-
-// tiempo por imagen (ms)
-const tiempo = 9000;
-
-let i = 0;
-const slide = document.querySelector(".slide");
-const img = document.getElementById("img");
+const slides = document.querySelectorAll(".slide");
+let actual = 0;
 
 function mostrar() {
-  slide.classList.remove("active");
-
-  setTimeout(() => {
-    img.src = imagenes[i] + "?t=" + Date.now();
-    slide.classList.add("active");
-    i = (i + 1) % imagenes.length;
-  }, 500);
+  const siguiente = (actual + 1) % 2;
+  
+  // Precargar siguiente imagen
+  slides[siguiente].querySelector("img").src = imagenes[i] + "?t=" + Date.now();
+  
+  // Esperar a que cargue y hacer transición
+  slides[siguiente].querySelector("img").onload = () => {
+    slides[actual].classList.remove("active");
+    slides[siguiente].classList.add("active");
+    actual = siguiente;
+  };
+  
+  i = (i + 1) % imagenes.length;
 }
 
-mostrar();
+// Cargar primera imagen
+slides[0].querySelector("img").src = imagenes[0];
+i = 1;
+
 setInterval(mostrar, tiempo);
 </script>
-
-</body>
-</html>// tiempo por imagen (ms)
-const tiempo = 10000;
-
-let i = 0;
-const img = document.getElementById("img");
-
-function mostrar() {
-  img.style.opacity = 0;
-
-  setTimeout(() => {
-    img.src = imagenes[i] + "?t=" + Date.now();
-    img.style.opacity = 1;
-    i = (i + 1) % imagenes.length;
-  }, 500);
-}
-
-mostrar();
-setInterval(mostrar, tiempo);
-</script>
-
 </body>
 </html>
