@@ -2,29 +2,28 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Publicidad</title>
-
 <style>
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
 }
-
 body{
   background:#000;
   width:100vw;
   height:100vh;
   overflow:hidden;
   cursor:none;
+  font-family: system-ui, -apple-system, sans-serif;
 }
-
 .slideshow-container{
   position:relative;
   width:100%;
   height:100%;
+  background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
 }
-
 .slide{
   position:absolute;
   inset:0;
@@ -33,8 +32,98 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
+  padding: 20px;
+}
+.slide.active{
+  opacity:1;
+}
+.slide img{
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 80px rgba(255, 255, 255, 0.03);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
+/* Optimización para TVs y pantallas grandes */
+@media (min-width: 1280px) {
+  .slide {
+    padding: 40px;
+  }
+  .slide img {
+    border-radius: 12px;
+  }
+}
+
+/* Previene parpadeo en transiciones */
+.slide img {
+  will-change: opacity;
+}
+
+/* Loader sutil mientras carga (opcional) */
+.slide::before {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.slide:not(.active)::before {
+  opacity: 1;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+<div class="slideshow-container">
+  <div class="slide active">
+    <img id="img" alt="Publicidad">
+  </div>
+</div>
+<script>
+// 👇 EDITA SOLO ESTA LISTA
+const imagenes = [
+  "images/imagen1.jpg",
+  "images/imagen2.jpg",
+  "images/imagen3.jpg"
+];
+// tiempo por imagen (ms)
+const tiempo = 5000;
+let i = 0;
+const slide = document.querySelector(".slide");
+const img = document.getElementById("img");
+function mostrar() {
+  slide.classList.remove("active");
+  setTimeout(() => {
+    img.src = imagenes[i] + "?t=" + Date.now();
+    slide.classList.add("active");
+    i = (i + 1) % imagenes.length;
+  }, 500);
+}
+mostrar();
+setInterval(mostrar, tiempo);
+</script>
+</body>
+</html>
 .slide.active{
   opacity:1;
 }
