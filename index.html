@@ -96,24 +96,22 @@ const imgs = document.querySelectorAll('.slide img');
 
 function cambiar() {
   const siguienteSlide = slideActual === 0 ? 1 : 0;
+  const siguienteIndice = (indice + 1) % imagenes.length;
   
   // Cargar siguiente imagen
-  imgs[siguienteSlide].src = imagenes[indice] + '?t=' + Date.now();
+  imgs[siguienteSlide].src = imagenes[siguienteIndice] + '?t=' + Date.now();
   
   // Esperar a que cargue
   imgs[siguienteSlide].onload = () => {
     slides[slideActual].classList.remove('show');
     slides[siguienteSlide].classList.add('show');
     slideActual = siguienteSlide;
+    indice = siguienteIndice;
   };
-  
-  // Avanzar índice
-  indice = (indice + 1) % imagenes.length;
 }
 
 // Mostrar primera imagen
 imgs[0].src = imagenes[0];
-indice = 1;
 
 // Cambiar según tiempo programado
 setInterval(cambiar, tiempo);
