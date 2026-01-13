@@ -72,7 +72,7 @@ const imagenes = [
   "images/imagen2.jpg"
 ];
 // tiempo por imagen (ms)
-const tiempo = 10000;
+const tiempo = 5000;
 let i = 0;
 const slide = document.querySelector(".slide");
 const img = document.getElementById("img");
@@ -80,6 +80,15 @@ function mostrar() {
   slide.classList.remove("active");
   setTimeout(() => {
     img.src = imagenes[i] + "?t=" + Date.now();
+    
+    // Detectar si la imagen no carga
+    img.onerror = function() {
+      console.log("Error: No se pudo cargar " + imagenes[i]);
+      // Saltar a la siguiente imagen
+      i = (i + 1) % imagenes.length;
+      mostrar();
+    };
+    
     slide.classList.add("active");
     i = (i + 1) % imagenes.length;
   }, 500);
