@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imagen Publicitaria</title>
+    <title>Kiosco Publicitario</title>
     <style>
         * {
             margin: 0;
@@ -64,15 +64,30 @@
         let images = [];
         let currentIndex = 0;
         let rotationTimer = null;
+        let checkUpdateInterval = null;
+        let lastModified = null;
+        let isRotating = false;
 
         async function loadImages() {
             try {
-                const response = await fetch('get_images.php');
+                const response = await fetch('get_images.php?t=' + Date.now());
                 const data = await response.json();
                 
                 if (data.success && data.images.length > 0) {
-                    images = data.images;
-                    displayImages();
+                    // Verificar si hay cambios en las imágenes
+                    const imagesChanged = JSON.stringify(images) !== JSON.stringify(data.images);
+                    
+                    if (imagesChanged) {
+                        console.log('Imágenes actualizadas, reiniciando rotación...');
+                        images = data.images;
+                        currentIndex = 0;
+                        stopRotation();
+                        displayImages();
+                    } else if (images.length === 0) {
+                        // Primera carga
+                        images = data.images;
+                        displayImages();
+                    }
                 } else {
                     document.getElementById('loading').textContent = 'No hay imágenes para mostrar';
                 }
@@ -86,45 +101,99 @@
             const container = document.getElementById('imageContainer');
             container.innerHTML = '';
             
+            // Crear todos los slides
             images.forEach((img, index) => {
                 const slide = document.createElement('div');
                 slide.className = 'slide';
                 if (index === 0) slide.classList.add('active');
                 
                 const imgElement = document.createElement('img');
-                imgElement.src = 'uploads/' + img.filename;
+                imgElement.src = 'uploads/' + img.filename + '?t=' + Date.now();
                 imgElement.alt = 'Imagen publicitaria';
                 
                 slide.appendChild(imgElement);
                 container.appendChild(slide);
             });
             
+            // Iniciar rotación si hay más de una imagen
             if (images.length > 1) {
                 startRotation();
+            } else if (images.length === 1) {
+                console.log('Solo hay una imagen, no se inicia rotación');
             }
         }
 
+        function stopRotation() {
+            if (rotationTimer) {
+                clearTimeout(rotationTimer);
+                rotationTimer = null;
+            }
+            isRotating = false;
+        }
+
         function startRotation() {
-            if (rotationTimer) clearInterval(rotationTimer);
+            // Detener cualquier rotación previa
+            stopRotation();
             
+            isRotating = true;
+            
+            // Obtener la duración de la imagen actual
             const currentDuration = images[currentIndex].duration * 1000;
             
+            console.log(`Mostrando imagen ${currentIndex + 1}/${images.length} por ${images[currentIndex].duration} segundos`);
+            
+            // Programar el siguiente cambio
             rotationTimer = setTimeout(() => {
+                if (!isRotating) return; // Por si se detuvo externamente
+                
                 const slides = document.querySelectorAll('.slide');
+                
+                // Ocultar imagen actual
                 slides[currentIndex].classList.remove('active');
                 
+                // Avanzar al siguiente índice
                 currentIndex = (currentIndex + 1) % images.length;
+                
+                // Mostrar nueva imagen
                 slides[currentIndex].classList.add('active');
                 
+                // Continuar la rotación
                 startRotation();
             }, currentDuration);
+        }
+
+        function checkForUpdates() {
+            // Verificar actualizaciones sin interrumpir la rotación actual
+            fetch('get_images.php?t=' + Date.now())
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.images.length > 0) {
+                        const imagesChanged = JSON.stringify(images) !== JSON.stringify(data.images);
+                        
+                        if (imagesChanged) {
+                            console.log('Cambios detectados, recargando imágenes...');
+                            loadImages();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al verificar actualizaciones:', error);
+                });
         }
 
         // Cargar imágenes al inicio
         loadImages();
         
-        // Recargar imágenes cada 30 segundos para detectar cambios
-        setInterval(loadImages, 30000);
+        // Verificar cambios cada 30 segundos SIN interrumpir la rotación
+        checkUpdateInterval = setInterval(checkForUpdates, 30000);
+        
+        // Limpiar intervalos al cerrar la página
+        window.addEventListener('beforeunload', () => {
+            stopRotation();
+            if (checkUpdateInterval) {
+                clearInterval(checkUpdateInterval);
+            }
+        });
     </script>
 </body>
 </html>
